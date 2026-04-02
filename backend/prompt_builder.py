@@ -7,12 +7,15 @@ def build_ready_prompt(cleaned_task: str, compressed_context: str) -> str:
     task = (cleaned_task or "").strip()
     ctx = (compressed_context or "").strip()
     return (
-        "You are helping with the following task:\n\n"
+        "You are helping with the following task (paste this whole block into Cursor Composer or Chat as one message):\n\n"
         f"{task}\n\n"
-        "Here is the minimal relevant repository context:\n\n"
+        "Here is the minimal relevant repository context (only these paths matter):\n\n"
         f"{ctx}\n\n"
-        "Please focus only on this task and this context.\n"
-        "If an assumption is required, state it explicitly."
+        "Rules for Cursor:\n"
+        "- Work only with the files and snippets shown above. Do not invent file paths, APIs, or modules that are not implied here.\n"
+        "- If something is missing from this context, say what you need instead of guessing.\n"
+        "- Please focus only on this task and this context.\n"
+        "- If an assumption is required, state it explicitly before acting."
     )
 
 

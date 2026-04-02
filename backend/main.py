@@ -4,20 +4,30 @@ Context Surgeon API — run: uvicorn main:app --reload --host 127.0.0.1 --port 8
 
 from __future__ import annotations
 
+import logging
 import re
 from pathlib import Path
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 
 from compressor import compress_file, compress_selection
-from demo_data import DEMO_USER_PROMPT, demo_repo_path
+from demo_data import DEMO_BIG_USER_PROMPT, DEMO_USER_PROMPT, demo_repo_big_path, demo_repo_path
 from prompt_builder import build_markdown_export, build_ready_prompt
 from prompt_cleaner import clean_prompt
 from relevance_ranker import rank_files
 from repo_scanner import parse_pasted_files, scan_repo
-from token_estimator import MOCK_PRICING, compute_stats, hallucination_risk_note
+from token_estimator import (
+    MOCK_PRICING,
+    compute_stats,
+    estimate_tokens,
+    hallucination_risk_note,
+    illustrative_wh_saved,
+)
+
+logger = logging.getLogger(__name__)
 
 app = FastAPI(title="Context Surgeon", version="1.0.0")
 
@@ -28,6 +38,8 @@ app.add_middleware(
         "http://localhost:5173",
         "http://127.0.0.1:4173",
         "http://localhost:4173",
+        "http://127.0.0.1:8000",
+        "http://localhost:8000",
     ],
     allow_credentials=True,
     allow_methods=["*"],
@@ -94,10 +106,13 @@ class RankedFileOut(BaseModel):
 class StatsOut(BaseModel):
     original_tokens: int
     compressed_tokens: int
+    tokens_saved: int
     reduction_pct: float
     original_chars: int
     compressed_chars: int
+    ready_message_tokens: int
     risk_note: str
+    illustrative_wh_saved_per_run: float
 
 
 class CostOut(BaseModel):
@@ -123,6 +138,10 @@ class AnalyzeResponse(BaseModel):
     cost: CostOut | None = None
     raw_bundle_preview: str = ""
     export_markdown: str = ""
+    # Readable labels for judges (Review + QA framing)
+    stats_before_label: str = ""
+    stats_after_label: str = ""
+    hackathon_track: str = "Review + QA — quality gate on context before the model sees it"
 
 
 @app.get("/api/health")
@@ -131,11 +150,21 @@ def health():
 
 
 @app.get("/api/demo")
-def get_demo():
+def get_demo(variant: str = "small"):
+    if variant == "big":
+        return {
+            "prompt": DEMO_BIG_USER_PROMPT,
+            "repo_path": str(demo_repo_big_path()),
+            "pasted": "",
+            "variant": "big",
+            "hint": "Demo 2: 16 noisy files — expect a large token cut; UI preview is clipped for speed.",
+        }
     return {
         "prompt": DEMO_USER_PROMPT,
         "repo_path": str(demo_repo_path()),
         "pasted": "",
+        "variant": "small",
+        "hint": "Demo 1: small repo — quick smoke test.",
     }
 
 
@@ -150,6 +179,14 @@ def analyze(body: AnalyzeRequest) -> AnalyzeResponse:
     if not prompt:
         return AnalyzeResponse(ok=False, error="empty_prompt")
 
+    try:
+        return _run_analyze(body, prompt)
+    except Exception:
+        logger.exception("analyze failed")
+        return AnalyzeResponse(ok=False, error="analysis_failed")
+
+
+def _run_analyze(body: AnalyzeRequest, prompt: str) -> AnalyzeResponse:
     files, src_label = _gather_files(body.repo_path, body.pasted)
     if src_label == "bad_repo":
         return AnalyzeResponse(ok=False, error="bad_repo")
@@ -168,8 +205,15 @@ def analyze(body: AnalyzeRequest) -> AnalyzeResponse:
     ready = build_ready_prompt(task_for_rank, compressed)
 
     raw_bundle = _original_bundle_text(prompt, files)
-    stats = compute_stats(raw_bundle, ready, model_key=body.mock_model)
-    risk = hallucination_risk_note(stats.reduction_pct)
+    # Compare worst-case paste (whole repo) vs what actually matters: task + compressed excerpts.
+    # The full Cursor paste (`ready`) adds safety instructions — reported separately.
+    payload_for_stats = f"{task_for_rank}\n\n{compressed}"
+    stats = compute_stats(raw_bundle, payload_for_stats, model_key=body.mock_model)
+    tokens_saved = max(0, stats.original_tokens - stats.compressed_tokens)
+    reduction_pct = max(0.0, stats.reduction_pct)
+    wh_saved = illustrative_wh_saved(tokens_saved)
+    risk = hallucination_risk_note(reduction_pct)
+    ready_message_tokens = estimate_tokens(len(ready))
 
     all_kw: list[str] = []
     for p in selected_paths:
@@ -183,10 +227,13 @@ def analyze(body: AnalyzeRequest) -> AnalyzeResponse:
         compressed,
         ready,
         [
-            f"Original ~tokens: {stats.original_tokens}",
-            f"Compressed ~tokens: {stats.compressed_tokens}",
-            f"Reduction: {stats.reduction_pct:.1f}%",
+            f"Original ~tokens (prompt + all files): {stats.original_tokens}",
+            f"Core payload ~tokens (task + compressed context): {stats.compressed_tokens}",
+            f"Reduction vs full-repo paste: {reduction_pct:.1f}%",
+            f"Full Cursor-ready message ~tokens: {ready_message_tokens}",
             f"Files: {len(files)} scanned, {len(selected_paths)} selected",
+            f"Tokens saved (est.): {tokens_saved}",
+            f"Illustrative Wh saved/run (demo only): {wh_saved}",
         ],
     )
 
@@ -214,10 +261,13 @@ def analyze(body: AnalyzeRequest) -> AnalyzeResponse:
         stats=StatsOut(
             original_tokens=stats.original_tokens,
             compressed_tokens=stats.compressed_tokens,
-            reduction_pct=stats.reduction_pct,
+            tokens_saved=tokens_saved,
+            reduction_pct=reduction_pct,
             original_chars=stats.original_chars,
             compressed_chars=stats.compressed_chars,
+            ready_message_tokens=ready_message_tokens,
             risk_note=risk,
+            illustrative_wh_saved_per_run=wh_saved,
         ),
         cost=CostOut(
             model_label=stats.model_label,
@@ -227,4 +277,16 @@ def analyze(body: AnalyzeRequest) -> AnalyzeResponse:
         ),
         raw_bundle_preview=preview,
         export_markdown=export_md,
+        stats_before_label="Worst case: your prompt + every scanned file pasted into the model",
+        stats_after_label="Core signal: cleaned task + compressed excerpts from only the top-ranked files",
+    )
+
+
+# Optional: serve built UI from the same port (after `npm run build` in frontend/)
+_FRONTEND_DIST = Path(__file__).resolve().parent.parent / "frontend" / "dist"
+if _FRONTEND_DIST.is_dir():
+    app.mount(
+        "/",
+        StaticFiles(directory=str(_FRONTEND_DIST), html=True),
+        name="spa",
     )

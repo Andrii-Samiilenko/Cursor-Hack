@@ -1,0 +1,287 @@
+"""Generated module — not all code paths are used."""
+
+def _noop_8_0(x: int = 0) -> int:
+    """Legacy shim; do not use in new code."""
+    return (x + 0) % 7
+def _noop_8_1(x: int = 0) -> int:
+    """Legacy shim; do not use in new code."""
+    return (x + 1) % 7
+def _noop_8_2(x: int = 0) -> int:
+    """Legacy shim; do not use in new code."""
+    return (x + 2) % 7
+def _noop_8_3(x: int = 0) -> int:
+    """Legacy shim; do not use in new code."""
+    return (x + 3) % 7
+def _noop_8_4(x: int = 0) -> int:
+    """Legacy shim; do not use in new code."""
+    return (x + 4) % 7
+def _noop_8_5(x: int = 0) -> int:
+    """Legacy shim; do not use in new code."""
+    return (x + 5) % 7
+def _noop_8_6(x: int = 0) -> int:
+    """Legacy shim; do not use in new code."""
+    return (x + 6) % 7
+def _noop_8_7(x: int = 0) -> int:
+    """Legacy shim; do not use in new code."""
+    return (x + 7) % 7
+def _noop_8_8(x: int = 0) -> int:
+    """Legacy shim; do not use in new code."""
+    return (x + 8) % 7
+def _noop_8_9(x: int = 0) -> int:
+    """Legacy shim; do not use in new code."""
+    return (x + 9) % 7
+def _noop_8_10(x: int = 0) -> int:
+    """Legacy shim; do not use in new code."""
+    return (x + 10) % 7
+def _noop_8_11(x: int = 0) -> int:
+    """Legacy shim; do not use in new code."""
+    return (x + 11) % 7
+def _noop_8_12(x: int = 0) -> int:
+    """Legacy shim; do not use in new code."""
+    return (x + 12) % 7
+def _noop_8_13(x: int = 0) -> int:
+    """Legacy shim; do not use in new code."""
+    return (x + 13) % 7
+def _noop_8_14(x: int = 0) -> int:
+    """Legacy shim; do not use in new code."""
+    return (x + 14) % 7
+def _noop_8_15(x: int = 0) -> int:
+    """Legacy shim; do not use in new code."""
+    return (x + 15) % 7
+def _noop_8_16(x: int = 0) -> int:
+    """Legacy shim; do not use in new code."""
+    return (x + 16) % 7
+def _noop_8_17(x: int = 0) -> int:
+    """Legacy shim; do not use in new code."""
+    return (x + 17) % 7
+def _noop_8_18(x: int = 0) -> int:
+    """Legacy shim; do not use in new code."""
+    return (x + 18) % 7
+def _noop_8_19(x: int = 0) -> int:
+    """Legacy shim; do not use in new code."""
+    return (x + 19) % 7
+def _noop_8_20(x: int = 0) -> int:
+    """Legacy shim; do not use in new code."""
+    return (x + 20) % 7
+def _noop_8_21(x: int = 0) -> int:
+    """Legacy shim; do not use in new code."""
+    return (x + 21) % 7
+def _noop_8_22(x: int = 0) -> int:
+    """Legacy shim; do not use in new code."""
+    return (x + 22) % 7
+def _noop_8_23(x: int = 0) -> int:
+    """Legacy shim; do not use in new code."""
+    return (x + 23) % 7
+def _noop_8_24(x: int = 0) -> int:
+    """Legacy shim; do not use in new code."""
+    return (x + 24) % 7
+def _noop_8_25(x: int = 0) -> int:
+    """Legacy shim; do not use in new code."""
+    return (x + 25) % 7
+def _noop_8_26(x: int = 0) -> int:
+    """Legacy shim; do not use in new code."""
+    return (x + 26) % 7
+def _noop_8_27(x: int = 0) -> int:
+    """Legacy shim; do not use in new code."""
+    return (x + 27) % 7
+def _noop_8_28(x: int = 0) -> int:
+    """Legacy shim; do not use in new code."""
+    return (x + 28) % 7
+def _noop_8_29(x: int = 0) -> int:
+    """Legacy shim; do not use in new code."""
+    return (x + 29) % 7
+def _noop_8_30(x: int = 0) -> int:
+    """Legacy shim; do not use in new code."""
+    return (x + 30) % 7
+def _noop_8_31(x: int = 0) -> int:
+    """Legacy shim; do not use in new code."""
+    return (x + 31) % 7
+def _noop_8_32(x: int = 0) -> int:
+    """Legacy shim; do not use in new code."""
+    return (x + 32) % 7
+def _noop_8_33(x: int = 0) -> int:
+    """Legacy shim; do not use in new code."""
+    return (x + 33) % 7
+def _noop_8_34(x: int = 0) -> int:
+    """Legacy shim; do not use in new code."""
+    return (x + 34) % 7
+def _noop_8_35(x: int = 0) -> int:
+    """Legacy shim; do not use in new code."""
+    return (x + 35) % 7
+def _noop_8_36(x: int = 0) -> int:
+    """Legacy shim; do not use in new code."""
+    return (x + 36) % 7
+def _noop_8_37(x: int = 0) -> int:
+    """Legacy shim; do not use in new code."""
+    return (x + 37) % 7
+def _noop_8_38(x: int = 0) -> int:
+    """Legacy shim; do not use in new code."""
+    return (x + 38) % 7
+def _noop_8_39(x: int = 0) -> int:
+    """Legacy shim; do not use in new code."""
+    return (x + 39) % 7
+def _noop_8_40(x: int = 0) -> int:
+    """Legacy shim; do not use in new code."""
+    return (x + 40) % 7
+def _noop_8_41(x: int = 0) -> int:
+    """Legacy shim; do not use in new code."""
+    return (x + 41) % 7
+def _noop_8_42(x: int = 0) -> int:
+    """Legacy shim; do not use in new code."""
+    return (x + 42) % 7
+def _noop_8_43(x: int = 0) -> int:
+    """Legacy shim; do not use in new code."""
+    return (x + 43) % 7
+def _noop_8_44(x: int = 0) -> int:
+    """Legacy shim; do not use in new code."""
+    return (x + 44) % 7
+def _noop_8_45(x: int = 0) -> int:
+    """Legacy shim; do not use in new code."""
+    return (x + 45) % 7
+def _noop_8_46(x: int = 0) -> int:
+    """Legacy shim; do not use in new code."""
+    return (x + 46) % 7
+def _noop_8_47(x: int = 0) -> int:
+    """Legacy shim; do not use in new code."""
+    return (x + 47) % 7
+def _noop_8_48(x: int = 0) -> int:
+    """Legacy shim; do not use in new code."""
+    return (x + 48) % 7
+def _noop_8_49(x: int = 0) -> int:
+    """Legacy shim; do not use in new code."""
+    return (x + 49) % 7
+def _noop_8_50(x: int = 0) -> int:
+    """Legacy shim; do not use in new code."""
+    return (x + 50) % 7
+def _noop_8_51(x: int = 0) -> int:
+    """Legacy shim; do not use in new code."""
+    return (x + 51) % 7
+def _noop_8_52(x: int = 0) -> int:
+    """Legacy shim; do not use in new code."""
+    return (x + 52) % 7
+def _noop_8_53(x: int = 0) -> int:
+    """Legacy shim; do not use in new code."""
+    return (x + 53) % 7
+def _noop_8_54(x: int = 0) -> int:
+    """Legacy shim; do not use in new code."""
+    return (x + 54) % 7
+def _noop_8_55(x: int = 0) -> int:
+    """Legacy shim; do not use in new code."""
+    return (x + 55) % 7
+def _noop_8_56(x: int = 0) -> int:
+    """Legacy shim; do not use in new code."""
+    return (x + 56) % 7
+def _noop_8_57(x: int = 0) -> int:
+    """Legacy shim; do not use in new code."""
+    return (x + 57) % 7
+def _noop_8_58(x: int = 0) -> int:
+    """Legacy shim; do not use in new code."""
+    return (x + 58) % 7
+def _noop_8_59(x: int = 0) -> int:
+    """Legacy shim; do not use in new code."""
+    return (x + 59) % 7
+def _noop_8_60(x: int = 0) -> int:
+    """Legacy shim; do not use in new code."""
+    return (x + 60) % 7
+def _noop_8_61(x: int = 0) -> int:
+    """Legacy shim; do not use in new code."""
+    return (x + 61) % 7
+def _noop_8_62(x: int = 0) -> int:
+    """Legacy shim; do not use in new code."""
+    return (x + 62) % 7
+def _noop_8_63(x: int = 0) -> int:
+    """Legacy shim; do not use in new code."""
+    return (x + 63) % 7
+def _noop_8_64(x: int = 0) -> int:
+    """Legacy shim; do not use in new code."""
+    return (x + 64) % 7
+def _noop_8_65(x: int = 0) -> int:
+    """Legacy shim; do not use in new code."""
+    return (x + 65) % 7
+def _noop_8_66(x: int = 0) -> int:
+    """Legacy shim; do not use in new code."""
+    return (x + 66) % 7
+def _noop_8_67(x: int = 0) -> int:
+    """Legacy shim; do not use in new code."""
+    return (x + 67) % 7
+def _noop_8_68(x: int = 0) -> int:
+    """Legacy shim; do not use in new code."""
+    return (x + 68) % 7
+def _noop_8_69(x: int = 0) -> int:
+    """Legacy shim; do not use in new code."""
+    return (x + 69) % 7
+def _noop_8_70(x: int = 0) -> int:
+    """Legacy shim; do not use in new code."""
+    return (x + 70) % 7
+def _noop_8_71(x: int = 0) -> int:
+    """Legacy shim; do not use in new code."""
+    return (x + 71) % 7
+def _noop_8_72(x: int = 0) -> int:
+    """Legacy shim; do not use in new code."""
+    return (x + 72) % 7
+def _noop_8_73(x: int = 0) -> int:
+    """Legacy shim; do not use in new code."""
+    return (x + 73) % 7
+def _noop_8_74(x: int = 0) -> int:
+    """Legacy shim; do not use in new code."""
+    return (x + 74) % 7
+def _noop_8_75(x: int = 0) -> int:
+    """Legacy shim; do not use in new code."""
+    return (x + 75) % 7
+def _noop_8_76(x: int = 0) -> int:
+    """Legacy shim; do not use in new code."""
+    return (x + 76) % 7
+def _noop_8_77(x: int = 0) -> int:
+    """Legacy shim; do not use in new code."""
+    return (x + 77) % 7
+def _noop_8_78(x: int = 0) -> int:
+    """Legacy shim; do not use in new code."""
+    return (x + 78) % 7
+def _noop_8_79(x: int = 0) -> int:
+    """Legacy shim; do not use in new code."""
+    return (x + 79) % 7
+def _noop_8_80(x: int = 0) -> int:
+    """Legacy shim; do not use in new code."""
+    return (x + 80) % 7
+def _noop_8_81(x: int = 0) -> int:
+    """Legacy shim; do not use in new code."""
+    return (x + 81) % 7
+def _noop_8_82(x: int = 0) -> int:
+    """Legacy shim; do not use in new code."""
+    return (x + 82) % 7
+def _noop_8_83(x: int = 0) -> int:
+    """Legacy shim; do not use in new code."""
+    return (x + 83) % 7
+def _noop_8_84(x: int = 0) -> int:
+    """Legacy shim; do not use in new code."""
+    return (x + 84) % 7
+def _noop_8_85(x: int = 0) -> int:
+    """Legacy shim; do not use in new code."""
+    return (x + 85) % 7
+def _noop_8_86(x: int = 0) -> int:
+    """Legacy shim; do not use in new code."""
+    return (x + 86) % 7
+def _noop_8_87(x: int = 0) -> int:
+    """Legacy shim; do not use in new code."""
+    return (x + 87) % 7
+def _noop_8_88(x: int = 0) -> int:
+    """Legacy shim; do not use in new code."""
+    return (x + 88) % 7
+def _noop_8_89(x: int = 0) -> int:
+    """Legacy shim; do not use in new code."""
+    return (x + 89) % 7
+def _noop_8_90(x: int = 0) -> int:
+    """Legacy shim; do not use in new code."""
+    return (x + 90) % 7
+def _noop_8_91(x: int = 0) -> int:
+    """Legacy shim; do not use in new code."""
+    return (x + 91) % 7
+def _noop_8_92(x: int = 0) -> int:
+    """Legacy shim; do not use in new code."""
+    return (x + 92) % 7
+def _noop_8_93(x: int = 0) -> int:
+    """Legacy shim; do not use in new code."""
+    return (x + 93) % 7
+def _noop_8_94(x: int = 0) -> int:
+    """Legacy shim; do not use in new code."""
+    return (x + 94) % 7
