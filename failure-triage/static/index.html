@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Failure Triage Bot</title>
+    <link rel="stylesheet" href="/style.css" />
+  </head>
+  <body>
+    <header class="header">
+      <h1>Failure Triage Bot</h1>
+      <p class="tagline">
+        Paste CI or test output — get hypotheses, fix steps, repro commands, and an
+        issue-ready export.
+      </p>
+    </header>
+
+    <main class="layout">
+      <section class="panel input-panel" aria-labelledby="input-heading">
+        <h2 id="input-heading">Log input</h2>
+        <label class="sr-only" for="log">Test or CI log</label>
+        <textarea
+          id="log"
+          name="log"
+          rows="16"
+          placeholder="Paste failing test output, traceback, or CI job log here…"
+          spellcheck="false"
+        ></textarea>
+
+        <div class="row">
+          <div class="field">
+            <label for="framework">Framework</label>
+            <select id="framework" name="framework">
+              <option value="auto">Auto-detect</option>
+              <option value="pytest">pytest</option>
+              <option value="jest">Jest</option>
+              <option value="vitest">Vitest</option>
+              <option value="generic">Generic</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="language">Language</label>
+            <select id="language" name="language">
+              <option value="auto">Auto</option>
+              <option value="python">Python</option>
+              <option value="javascript">JavaScript</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="note">Optional context (recent change, branch, etc.)</label>
+          <input type="text" id="note" name="note" maxlength="2000" placeholder="e.g. after upgrading pydantic" />
+        </div>
+
+        <div class="actions">
+          <button type="button" id="submit" class="btn primary">Analyze log</button>
+          <button type="button" id="clear" class="btn">Clear</button>
+        </div>
+
+        <div class="demo">
+          <span class="demo-label">Load sample:</span>
+          <div id="fixture-buttons" class="fixture-buttons"></div>
+        </div>
+      </section>
+
+      <section class="panel output-panel" aria-live="polite" aria-busy="false" id="output-section">
+        <h2>Triage</h2>
+        <p id="placeholder" class="placeholder">
+          Results appear here after you analyze a log or load a sample.
+        </p>
+        <div id="error" class="error" hidden></div>
+        <div id="loading" class="loading" hidden>Analyzing…</div>
+        <div id="result" class="result" hidden></div>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <span>MVP — rule-based triage, no API key required.</span>
+    </footer>
+
+    <script src="/app.js"></script>
+  </body>
+</html>
