@@ -19,6 +19,13 @@ look at both the frontend and backend. Thanks!
 # Single textarea demo: task + verbose draft together
 DEMO_USER_PROMPT = f"{DEMO_TASK}\n\n{DEMO_MESSY_PROMPT}".strip()
 
+# Large noisy repo (`demo_repo_big/`) — strong token / $ / Wh demo for judges
+DEMO_BIG_USER_PROMPT = (
+    "Fix the auth bug: users with valid credentials get 401 when opening the internal dashboard. "
+    "Check login flow, token validation, session ordering, and dashboard session refresh. "
+    "Do not refactor unrelated billing, email workers, or legacy batch jobs."
+)
+
 # In-memory mirror of demo_repo/ (used if path missing)
 DEMO_FILES: dict[str, str] = {
     "README.md": """# Demo Auth Service
@@ -115,6 +122,11 @@ DEBUG = True
 def demo_repo_path() -> Path:
     """Absolute path to bundled `demo_repo/` next to this package."""
     return Path(__file__).resolve().parent / "demo_repo"
+
+
+def demo_repo_big_path() -> Path:
+    """Stress-test repo (~15+ files, lots of noise). Generate with `python backend/scripts/generate_big_demo.py`."""
+    return Path(__file__).resolve().parent / "demo_repo_big"
 
 
 def load_demo_files() -> dict[str, str]:

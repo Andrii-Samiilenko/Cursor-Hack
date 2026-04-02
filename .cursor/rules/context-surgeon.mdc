@@ -1,0 +1,12 @@
+---
+description: Before large Cursor Composer or Agent runs, trim prompt and repo context with Context Surgeon (local tool in this repo).
+alwaysApply: false
+---
+
+# Context Surgeon → Cursor workflow
+
+1. Run the **Context Surgeon** app (`backend` + `frontend` per README): paste your full prompt, set the repo path (or paste files with `-----FILE:` markers), click **Analyze context**.
+2. Copy the **Ready to paste** block and paste it into **Cursor** as **one** message (Composer or Chat).
+3. Prefer that prepared block over dumping the whole repository — it lists **only** the paths and snippets the tool selected, which reduces noise and invented file paths.
+
+If the agent says context is missing, re-run Context Surgeon with a clearer prompt or add paths manually, rather than letting the model guess.

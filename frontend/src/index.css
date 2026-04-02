@@ -17,3 +17,23 @@
     scrollbar-color: rgba(61, 214, 198, 0.35) transparent;
   }
 }
+
+@keyframes metric-shine {
+  0% {
+    background-position: 200% center;
+  }
+  100% {
+    background-position: -200% center;
+  }
+}
+
+.metric-bar-fill {
+  background: linear-gradient(
+    90deg,
+    rgba(61, 214, 198, 0.35),
+    rgba(94, 234, 212, 0.85),
+    rgba(61, 214, 198, 0.35)
+  );
+  background-size: 200% 100%;
+  animation: metric-shine 3s ease-in-out infinite;
+}

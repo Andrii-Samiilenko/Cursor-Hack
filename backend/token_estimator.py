@@ -63,6 +63,17 @@ def compute_stats(
     )
 
 
+def illustrative_wh_saved(tokens_saved: int) -> float:
+    """
+    Demo-only ballpark: energy *not* sent to an API is loosely correlated with
+    fewer input tokens. This is NOT measured for your workload — hackathon viz only.
+    Scale: ~0.00012 Wh per 1k input tokens avoided (order-of-magnitude fiction; not measured).
+    """
+    if tokens_saved <= 0:
+        return 0.0
+    return round((tokens_saved / 1000.0) * 0.00012, 6)
+
+
 def hallucination_risk_note(reduction_pct: float) -> str:
     """Informal label based on how much context was removed."""
     if reduction_pct < 20:
