@@ -10,7 +10,7 @@ Think of **two pieces**: the website (React) and the server (Python).
    - **Rank files** (`relevance_ranker`) — scores which files match the task (filename, content, symbol names, simple import hints).
    - **Compress** (`compressor`) — keeps imports, signatures, and keyword-adjacent snippets; long bodies become placeholders like “implementation omitted.”
    - **Build the final block** (`prompt_builder`) — one Cursor-ready paste with rules like “don’t invent paths.”
-   - **Numbers** (`token_estimator`) — rough token estimate (chars ÷ 4) and mock $ / Wh for the demo.
+   - **Numbers** (`token_estimator`) — **tiktoken** for OpenAI-style counts where available; **published list prices** for input-token $ estimates; Claude uses a ~chars÷4 approximation unless you wire Anthropic’s counter.
 4. **The response** goes back to the page — you see cleaned prompt, file picks, compressed context, metrics, and copy/download.
 
 **Bottom line:** data flows **form → API → Python modules → JSON → UI**. We **don’t rewrite your repo on disk**; we only change what we **show** and what you **paste into the chat**.

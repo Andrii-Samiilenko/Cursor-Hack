@@ -17,7 +17,7 @@ type Stats = {
   compressed_chars: number;
   ready_message_tokens: number;
   risk_note: string;
-  illustrative_wh_saved_per_run: number;
+  tokenizer_note: string;
 };
 
 type Cost = {
@@ -45,7 +45,6 @@ type AnalyzeResponse = {
   export_markdown: string;
   stats_before_label: string;
   stats_after_label: string;
-  hackathon_track: string;
 };
 
 const ERRORS: Record<string, string> = {
@@ -81,7 +80,7 @@ function normalizeAnalyzeResponse(raw: Record<string, unknown>): AnalyzeResponse
           compressed_chars: num(st.compressed_chars),
           ready_message_tokens: num(st.ready_message_tokens),
           risk_note: typeof st.risk_note === "string" ? st.risk_note : "",
-          illustrative_wh_saved_per_run: num(st.illustrative_wh_saved_per_run),
+          tokenizer_note: typeof st.tokenizer_note === "string" ? st.tokenizer_note : "",
         }
       : null;
   const cost: Cost | null =
@@ -111,7 +110,6 @@ function normalizeAnalyzeResponse(raw: Record<string, unknown>): AnalyzeResponse
     export_markdown: typeof raw.export_markdown === "string" ? raw.export_markdown : "",
     stats_before_label: typeof raw.stats_before_label === "string" ? raw.stats_before_label : "",
     stats_after_label: typeof raw.stats_after_label === "string" ? raw.stats_after_label : "",
-    hackathon_track: typeof raw.hackathon_track === "string" ? raw.hackathon_track : "",
   };
 }
 
@@ -202,8 +200,8 @@ export default function App() {
   const [prompt, setPrompt] = useState("");
   const [repoPath, setRepoPath] = useState("");
   const [pasted, setPasted] = useState("");
-  const [mockModel, setMockModel] = useState("gpt-4o-mini (mock)");
-  const [models, setModels] = useState<string[]>([]);
+  const [pricingModel, setPricingModel] = useState("gpt-4o-mini");
+  const [modelRows, setModelRows] = useState<{ id: string; label: string; tokenizer_note?: string }[]>([]);
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<AnalyzeResponse | null>(null);
   const [copyState, setCopyState] = useState<"idle" | "ok" | "err">("idle");
@@ -214,8 +212,17 @@ export default function App() {
   useEffect(() => {
     fetch("/api/pricing-models")
       .then((r) => r.json())
-      .then((d: { models: string[] }) => setModels(d.models || []))
-      .catch(() => setModels(["gpt-4o-mini (mock)"]));
+      .then((d: { models?: unknown }) => {
+        const raw = d.models;
+        if (Array.isArray(raw) && raw.length > 0 && typeof raw[0] === "object" && raw[0] !== null && "id" in (raw[0] as object)) {
+          setModelRows(raw as { id: string; label: string; tokenizer_note?: string }[]);
+        } else if (Array.isArray(raw)) {
+          setModelRows((raw as string[]).map((id) => ({ id, label: id })));
+        } else {
+          setModelRows([{ id: "gpt-4o-mini", label: "GPT-4o mini" }]);
+        }
+      })
+      .catch(() => setModelRows([{ id: "gpt-4o-mini", label: "GPT-4o mini" }]));
   }, []);
 
   const loadDemo = useCallback(async (variant: "small" | "big" = "small") => {
@@ -245,7 +252,7 @@ export default function App() {
           prompt,
           repo_path: repoPath,
           pasted,
-          mock_model: mockModel,
+          pricing_model: pricingModel,
         }),
       });
       let raw: Record<string, unknown>;
@@ -268,10 +275,9 @@ export default function App() {
           cost: null,
           raw_bundle_preview: "",
           export_markdown: "",
-          stats_before_label: "",
-          stats_after_label: "",
-          hackathon_track: "",
-        });
+        stats_before_label: "",
+        stats_after_label: "",
+      });
         return;
       }
       const data = normalizeAnalyzeResponse(raw);
@@ -311,12 +317,11 @@ export default function App() {
         export_markdown: "",
         stats_before_label: "",
         stats_after_label: "",
-        hackathon_track: "",
       });
     } finally {
       setLoading(false);
     }
-  }, [prompt, repoPath, pasted, mockModel]);
+  }, [prompt, repoPath, pasted, pricingModel]);
 
   const copyReady = useCallback(async () => {
     if (!result?.ready_prompt) return;
@@ -344,10 +349,7 @@ export default function App() {
     const daysPerMonth = workdaysOnly ? 22 : 30;
     const dailyUsd = result.cost.cost_saved_usd * runsPerDay;
     const monthlyUsd = dailyUsd * daysPerMonth;
-    const dailyTok = result.stats.tokens_saved * runsPerDay;
-    const dailyWh = result.stats.illustrative_wh_saved_per_run * runsPerDay;
-    const monthlyWh = dailyWh * daysPerMonth;
-    return { dailyUsd, monthlyUsd, dailyTok, dailyWh, monthlyWh, daysPerMonth };
+    return { dailyUsd, monthlyUsd, daysPerMonth };
   }, [result, runsPerDay, workdaysOnly]);
 
   const errMsg = result && !result.ok ? ERRORS[result.error || ""] || result.error || "Unknown error" : null;
@@ -362,47 +364,29 @@ export default function App() {
           One messy prompt in → we <strong className="text-slate-300">clean</strong> it, <strong className="text-slate-300">rank</strong> repo files,
           <strong className="text-slate-300"> compress</strong> structure, then you paste <strong className="text-accent">one Cursor-ready block</strong> out.
         </p>
-        <div className="mt-4 flex flex-wrap gap-2 text-[11px]">
-          <span className="rounded-full bg-amber-500/15 text-amber-200/95 px-3 py-1 border border-amber-500/25">Main road: Review + QA</span>
-          <span className="rounded-full bg-surface-700 text-slate-400 px-3 py-1 border border-white/[0.08]">Side quests: dev tool · Cursor workflow · reliability · AI safety</span>
-        </div>
-
-        <details className="mt-6 max-w-2xl rounded-xl border border-surface-600 bg-surface-800/40 px-4 py-3 text-sm text-slate-400">
-          <summary className="cursor-pointer text-accent font-medium list-none flex items-center gap-2">
-            <span aria-hidden>▸</span> How this fixes “too much context” (plain English)
-          </summary>
-          <div className="mt-3 space-y-2 text-slate-400 text-[13px] leading-relaxed pl-6 border-l border-accent/25">
-            <p>
-              <strong className="text-slate-300">Cursor doesn’t magically know</strong> which 3 files matter. If you paste the whole repo (or say “fix auth”), the model gets
-              <em> mountains</em> of text — it drifts, hallucinates paths, or burns tokens.
-            </p>
-            <p>
-              <strong className="text-slate-300">We don’t replace Cursor.</strong> We <em>prepare</em> the briefing: a short task + only the top relevant files, stripped to signatures
-              and keyword snippets. The final prompt literally says “work only with what’s below” — so the model is steered to real paths you included.
-            </p>
-            <p>
-              Think of it as a <strong className="text-slate-300">map + excerpt</strong>, not the full book: Cursor still writes code, but it reads a cleaner menu first.
-            </p>
-          </div>
-        </details>
       </header>
 
       <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-start">
         <div className="space-y-5">
           <div className="rounded-2xl bg-surface-800/90 backdrop-blur-md shadow-card p-6 border border-white/[0.08]">
             <label className="block mb-4">
-              <span className="text-xs font-medium text-slate-500 uppercase tracking-wider">Mock pricing model</span>
+              <span className="text-xs font-medium text-slate-500 uppercase tracking-wider">Model · tokenizer & list price</span>
               <select
-                value={mockModel}
-                onChange={(e) => setMockModel(e.target.value)}
+                value={pricingModel}
+                onChange={(e) => setPricingModel(e.target.value)}
                 className="mt-1 w-full rounded-xl bg-surface-900 border border-surface-600 px-4 py-2.5 text-sm text-slate-200 focus:ring-2 focus:ring-accent/30"
               >
-                {(models.length ? models : [mockModel]).map((m) => (
-                  <option key={m} value={m}>
-                    {m}
+                {(modelRows.length ? modelRows : [{ id: pricingModel, label: pricingModel }]).map((m) => (
+                  <option key={m.id} value={m.id}>
+                    {m.label}
                   </option>
                 ))}
               </select>
+              {modelRows.find((m) => m.id === pricingModel)?.tokenizer_note && (
+                <p className="text-[10px] text-slate-600 mt-1.5 leading-relaxed">
+                  {modelRows.find((m) => m.id === pricingModel)?.tokenizer_note}
+                </p>
+              )}
             </label>
 
             <div className="flex flex-wrap gap-2 mb-2">
@@ -478,8 +462,8 @@ export default function App() {
           </div>
 
           <p className="text-xs text-slate-500 px-1 leading-relaxed">
-            Tokens ≈ chars÷4. Dollar and “Wh” projections use <strong className="text-slate-400">mock rates</strong> and a <strong className="text-slate-400">demo-only</strong> energy
-            scale — not your real bill or carbon footprint.
+            OpenAI options use <strong className="text-slate-400">tiktoken</strong> for counts; Claude uses a <strong className="text-slate-400">~chars÷4</strong> estimate. Dollar totals use{" "}
+            <strong className="text-slate-400">published input list prices</strong> — verify against your provider before reconciling bills.
           </p>
         </div>
 
@@ -505,16 +489,11 @@ export default function App() {
 
           {result?.ok && result.stats && result.cost && (
             <>
-              {result.hackathon_track && (
-                <div className="rounded-xl border border-accent/25 bg-accent/5 px-4 py-3 text-sm text-slate-300 mb-2">
-                  <span className="text-accent font-semibold text-xs uppercase tracking-wider">Hackathon pitch line · </span>
-                  {result.hackathon_track}
-                </div>
-              )}
               <Section n={1} title="Cleaned prompt">
-                <p className="text-[11px] text-slate-500 mb-2 leading-relaxed">
-                  Text-only cleanup (dedupe, trim filler). Token savings from this step alone are usually small — see <strong className="text-slate-400">Impact</strong> for the big win:
-                  <strong className="text-slate-400"> which code</strong> you attach to the model.
+                <p className="text-[10px] text-slate-500 mb-2 leading-relaxed">
+                  <strong className="text-slate-400">Your</strong> task after <strong className="text-slate-400">rule-based</strong> cleanup (dedupe, filler) — <strong className="text-slate-400">not</strong> an LLM; often
+                  unchanged if already tight. Small token delta here; <strong className="text-slate-400">Impact</strong> is where <strong className="text-slate-400">which code</strong> you send matters.{" "}
+                  <strong className="text-slate-400">Step 5 · Ready for Cursor</strong> below = full paste block.
                 </p>
                 <p className="text-slate-300 text-sm leading-relaxed whitespace-pre-wrap">{result.cleaned_prompt || "—"}</p>
                 {result.audit_log.length > 0 && (
@@ -618,10 +597,13 @@ export default function App() {
                     />
                   </div>
                   <p className="text-xs text-slate-500 mt-2">
-                    <strong className="text-accent">{result.stats.tokens_saved.toLocaleString()}</strong> fewer input tokens (est.) for the{" "}
+                    <strong className="text-accent">{result.stats.tokens_saved.toLocaleString()}</strong> fewer input tokens for the{" "}
                     <strong className="text-slate-400">combined message to the model</strong> — not a diff of your files on disk. Baseline:{" "}
                     <em>prompt + every file’s full text</em> · Recommended: <em>cleaned task + compressed excerpts from chosen files</em>.
                   </p>
+                  {result.stats.tokenizer_note && (
+                    <p className="text-[10px] text-slate-600 mt-2 font-mono leading-relaxed">Counting: {result.stats.tokenizer_note}</p>
+                  )}
                   {result.stats.tokens_saved < 500 && (
                     <p className="text-xs text-amber-200/80 mt-2 border border-amber-500/25 rounded-lg px-2 py-1.5 bg-amber-950/20">
                       Numbers look flat? Try <strong>Demo 2 · large repo</strong> (~16 noisy files) for a strong before/after (~70% cut in tests).
@@ -672,31 +654,21 @@ export default function App() {
                   {projections && (
                     <div className="grid sm:grid-cols-2 gap-3">
                       <div className="rounded-xl bg-surface-900/90 p-4 border border-accent/15">
-                        <div className="text-[10px] uppercase text-slate-500 tracking-wider">Mock $ / day</div>
+                        <div className="text-[10px] uppercase text-slate-500 tracking-wider">Est. input $ / day</div>
                         <div className="text-xl font-semibold text-accent font-mono mt-1">${fmtUsd(projections.dailyUsd)}</div>
                         <div className="text-[10px] text-slate-600 mt-1">{runsPerDay}× save/run @ {result.cost.model_label}</div>
                       </div>
                       <div className="rounded-xl bg-surface-900/90 p-4 border border-white/[0.06]">
-                        <div className="text-[10px] uppercase text-slate-500 tracking-wider">Mock $ / month (~{projections.daysPerMonth}d)</div>
+                        <div className="text-[10px] uppercase text-slate-500 tracking-wider">Est. input $ / month (~{projections.daysPerMonth}d)</div>
                         <div className="text-xl font-semibold text-slate-200 font-mono mt-1">${fmtUsd(projections.monthlyUsd)}</div>
-                        <div className="text-[10px] text-slate-600 mt-1">Illustrative stack-up only</div>
-                      </div>
-                      <div className="rounded-xl bg-surface-900/90 p-4 border border-white/[0.06] sm:col-span-2">
-                        <div className="text-[10px] uppercase text-slate-500 tracking-wider">Illustrative energy (demo scale)</div>
-                        <p className="text-sm text-slate-300 mt-2">
-                          <span className="font-mono text-accent-glow">~{projections.dailyWh.toFixed(3)} Wh</span> / day ·{" "}
-                          <span className="font-mono text-slate-400">~{projections.monthlyWh.toFixed(2)} Wh</span> / month
-                        </p>
-                        <p className="text-[10px] text-slate-600 mt-2 leading-relaxed">
-                          Fictional factor: fewer input tokens ≈ less inference work. Not measured on your GPU/region — for hackathon storytelling only.
-                        </p>
+                        <div className="text-[10px] text-slate-600 mt-1">List-price math only (input tokens)</div>
                       </div>
                     </div>
                   )}
                 </div>
 
                 <p className="text-xs text-slate-500 mt-4">
-                  Per-run input (mock): ~${result.cost.estimated_original_cost_usd.toFixed(5)} → ~${result.cost.estimated_compressed_cost_usd.toFixed(5)} · save ~$
+                  Per-run input (list price est.): ~${result.cost.estimated_original_cost_usd.toFixed(5)} → ~${result.cost.estimated_compressed_cost_usd.toFixed(5)} · save ~$
                   {fmtUsd(result.cost.cost_saved_usd)}
                 </p>
                 <p className="text-xs text-slate-400 mt-2 border-l-2 border-accent/40 pl-3">{result.stats.risk_note}</p>

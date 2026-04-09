@@ -28,11 +28,11 @@ Everything is **deterministic** — **no second LLM** inside our tool — so the
 
 “Let me show it. I’ll hit **Demo 2 · large repo** — that’s a **stress repo** with lots of legacy noise — then **Analyze**.  
 
-You see **before vs after**: we compare **‘prompt plus every file’** — the worst case — to **‘cleaned task plus only the compressed excerpts we kept.’** That’s where the **big token and mock-dollar savings** come from.  
+You see **before vs after**: we compare **‘prompt plus every file’** — the worst case — to **‘cleaned task plus only the compressed excerpts we kept.’** That’s where the **big token and estimated input-dollar savings** come from (list prices + tiktoken for OpenAI models).  
 
 The **copy block** adds **Cursor-specific rules**: work only with listed paths, don’t invent APIs. That’s our **Cursor-native workflow** angle.”
 
-*(Pause on Impact section: % cut, $/day slider, optional Wh disclaimer.)*
+*(Pause on Impact section: % cut, $/day slider — list-price estimates.)*
 
 ---
 
@@ -48,7 +48,7 @@ The **copy block** adds **Cursor-specific rules**: work only with listed paths, 
 
 ### 2:15–2:45 — Side quests (one line each)
 
-“For **side quests**: **best dev tool** — obvious. **Cursor-native** — paste-ready block plus `.cursor/rules`. **Reliability system** — audit trail and deterministic pipeline. **AI safety** — narrower context and explicit ‘don’t hallucinate paths’ instructions. We’re honest that **$ and Wh** numbers use **mock** rates for storytelling.”
+“For **side quests**: **best dev tool** — obvious. **Cursor-native** — paste-ready block plus `.cursor/rules`. **Reliability system** — audit trail and deterministic pipeline. **AI safety** — narrower context and explicit ‘don’t hallucinate paths’ instructions. We’re honest that **$** uses **published list prices** plus **tiktoken** for OpenAI counts — not your invoice; we dropped fake **Wh** energy.”
 
 ---
 

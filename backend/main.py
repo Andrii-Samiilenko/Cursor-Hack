@@ -11,7 +11,7 @@ from pathlib import Path
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
-from pydantic import BaseModel, Field
+from pydantic import AliasChoices, BaseModel, Field, field_validator
 
 from compressor import compress_file, compress_selection
 from demo_data import DEMO_BIG_USER_PROMPT, DEMO_USER_PROMPT, demo_repo_big_path, demo_repo_path
@@ -20,11 +20,11 @@ from prompt_cleaner import clean_prompt
 from relevance_ranker import rank_files
 from repo_scanner import parse_pasted_files, scan_repo
 from token_estimator import (
-    MOCK_PRICING,
     compute_stats,
-    estimate_tokens,
+    count_tokens,
     hallucination_risk_note,
-    illustrative_wh_saved,
+    list_pricing_models,
+    normalize_model_id,
 )
 
 logger = logging.getLogger(__name__)
@@ -93,7 +93,16 @@ class AnalyzeRequest(BaseModel):
     prompt: str = Field(..., description="Full user prompt (task + any verbose context)")
     repo_path: str = ""
     pasted: str = ""
-    mock_model: str = "gpt-4o-mini (mock)"
+    pricing_model: str = Field(
+        default="gpt-4o-mini",
+        validation_alias=AliasChoices("pricing_model", "mock_model"),
+        description="Catalog id for tokenizer + published input list price",
+    )
+
+    @field_validator("pricing_model", mode="before")
+    @classmethod
+    def _normalize_pricing_model(cls, v: object) -> str:
+        return normalize_model_id(str(v) if v is not None else "")
 
 
 class RankedFileOut(BaseModel):
@@ -112,7 +121,7 @@ class StatsOut(BaseModel):
     compressed_chars: int
     ready_message_tokens: int
     risk_note: str
-    illustrative_wh_saved_per_run: float
+    tokenizer_note: str
 
 
 class CostOut(BaseModel):
@@ -138,10 +147,8 @@ class AnalyzeResponse(BaseModel):
     cost: CostOut | None = None
     raw_bundle_preview: str = ""
     export_markdown: str = ""
-    # Readable labels for judges (Review + QA framing)
     stats_before_label: str = ""
     stats_after_label: str = ""
-    hackathon_track: str = "Review + QA — quality gate on context before the model sees it"
 
 
 @app.get("/api/health")
@@ -170,7 +177,11 @@ def get_demo(variant: str = "small"):
 
 @app.get("/api/pricing-models")
 def pricing_models():
-    return {"models": list(MOCK_PRICING.keys())}
+    return {
+        "models": list_pricing_models(),
+        "pricing_note": "USD per 1M input tokens from public list prices; confirm on the provider site.",
+        "token_note": "OpenAI picks use tiktoken; Claude uses a chars÷4 estimate unless you extend the backend.",
+    }
 
 
 @app.post("/api/analyze", response_model=AnalyzeResponse)
@@ -208,12 +219,11 @@ def _run_analyze(body: AnalyzeRequest, prompt: str) -> AnalyzeResponse:
     # Compare worst-case paste (whole repo) vs what actually matters: task + compressed excerpts.
     # The full Cursor paste (`ready`) adds safety instructions — reported separately.
     payload_for_stats = f"{task_for_rank}\n\n{compressed}"
-    stats = compute_stats(raw_bundle, payload_for_stats, model_key=body.mock_model)
+    stats = compute_stats(raw_bundle, payload_for_stats, model_id=body.pricing_model)
     tokens_saved = max(0, stats.original_tokens - stats.compressed_tokens)
     reduction_pct = max(0.0, stats.reduction_pct)
-    wh_saved = illustrative_wh_saved(tokens_saved)
     risk = hallucination_risk_note(reduction_pct)
-    ready_message_tokens = estimate_tokens(len(ready))
+    ready_message_tokens, _ready_note = count_tokens(ready, body.pricing_model)
 
     all_kw: list[str] = []
     for p in selected_paths:
@@ -233,7 +243,7 @@ def _run_analyze(body: AnalyzeRequest, prompt: str) -> AnalyzeResponse:
             f"Full Cursor-ready message ~tokens: {ready_message_tokens}",
             f"Files: {len(files)} scanned, {len(selected_paths)} selected",
             f"Tokens saved (est.): {tokens_saved}",
-            f"Illustrative Wh saved/run (demo only): {wh_saved}",
+            f"Token counting: {stats.tokenizer_note}",
         ],
     )
 
@@ -267,7 +277,7 @@ def _run_analyze(body: AnalyzeRequest, prompt: str) -> AnalyzeResponse:
             compressed_chars=stats.compressed_chars,
             ready_message_tokens=ready_message_tokens,
             risk_note=risk,
-            illustrative_wh_saved_per_run=wh_saved,
+            tokenizer_note=stats.tokenizer_note,
         ),
         cost=CostOut(
             model_label=stats.model_label,
